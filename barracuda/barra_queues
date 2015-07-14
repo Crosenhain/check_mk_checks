@@ -1,0 +1,157 @@
+check_default_levels["barra_queues"] = "barra_queues_default_levels"
+
+factory_settings["barra_queues_default_levels"] = {
+	"inqueue" : (50, 100),
+	"outqueue" : (50, 100),
+	"deferredqueue" : (50, 100),
+	"notifyqueue" : (50, 100)
+}
+
+def inventory_barra_queues (info):
+
+	# Debug: lets see how the data we get looks like
+	#import pprint
+	#if info[0]:
+	#	pprint.pprint(info[0])
+	#	pprint.pprint(len(info[0][0]))
+	#return []
+	
+	inventory = []
+
+	for inqueue, outqueue, deferredqueue, notifyqueue in info[0]:
+		inventory.append( ("Cuda Queues", {}) )
+
+	return inventory
+
+
+
+def check_barra_queues (item, params, info):
+	# Debug: lets see how the data we get looks like
+	#import pprint
+	#if info[0]:
+	#	pprint.pprint(info[0])
+	#	pprint.pprint(len(info[0][0]))
+	#return []
+
+	if len(info) != 1:
+		return(3, "UNKNOWN - Invalid output from Agent")
+
+	moduleinfo = {}
+	perfdata = []
+	severity = "OK"
+	rc = 0
+	infotext = "Queue Length"
+
+
+	# Get warn/crit values
+	inqueueparams = params.get("inqueue")
+	if inqueueparams == None:
+		inqueuewarn, inqueuecrit = None, None
+	else:
+		inqueuewarn, inqueuecrit = inqueueparams
+
+	outqueueparams = params.get("outqueue")
+	if outqueueparams == None:
+		outqueuewarn, outqueuecrit = None, None
+	else:
+		outqueuewarn, outqueuecrit = outqueueparams
+
+	deferredqueueparams = params.get("deferredqueue")
+	if deferredqueueparams == None:
+		deferredqueuewarn, deferredqueuecrit = None, None
+	else:
+		deferredqueuewarn, deferredqueuecrit = deferredqueueparams
+
+	notifyqueueparams = params.get("notifyqueue")
+	if notifyqueueparams == None:
+		notifyqueuewarn, notifyqueuecrit = None, None
+	else:
+		notifyqueuewarn, notifyqueuecrit = notifyqueueparams
+
+
+	for inqueue, outqueue, deferredqueue, notifyqueue in info[0]:
+		# compare inqueue measurement value against warn, crit thresholds
+		if inqueuecrit and inqueuewarn:
+			if saveint(inqueue) >= inqueuecrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " inqueue: %s Messages (!!)," % (inqueue)
+			elif saveint(inqueue) >= inqueuewarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " inqueue: %s Messages (!)," % (inqueue)
+			else:
+				infotext += " inqueue: %s Messages," % (inqueue)
+		else:
+			infotext += " inqueue: %s Messages," % (inqueue)
+
+		# compare outqueue measurement value against warn, crit thresholds
+		if outqueuecrit and outqueuewarn:
+			if saveint(outqueue) >= outqueuecrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " outqueue: %s Messages (!!)," % (outqueue)
+			elif saveint(outqueue) >= outqueuewarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " outqueue: %s Messages (!)," % (outqueue)
+			else:
+				infotext += " outqueue: %s Messages," % (outqueue)
+		else:
+			infotext += " outqueue: %s Messages," % (outqueue)
+
+		# compare deferredqueue measurement value against warn, crit thresholds
+		if deferredqueuecrit and deferredqueuewarn:
+			if saveint(deferredqueue) >= deferredqueuecrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " deferredqueue: %s Messages (!!)," % (deferredqueue)
+			elif saveint(deferredqueue) >= deferredqueuewarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " deferredqueue: %s Messages (!)," % (deferredqueue)
+			else:
+				infotext += " deferredqueue: %s Messages," % (deferredqueue)
+		else:
+			infotext += " deferredqueue: %s Messages," % (deferredqueue)
+
+		# compare notifyqueue measurement value against warn, crit thresholds
+		if notifyqueuecrit and notifyqueuewarn:
+			if saveint(notifyqueue) >= notifyqueuecrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " notifyqueue: %s Messages (!!)" % (notifyqueue)
+			elif saveint(notifyqueue) >= notifyqueuewarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " notifyqueue: %s Messages (!)" % (notifyqueue)
+			else:
+				infotext += " notifyqueue: %s Messages" % (notifyqueue)
+		else:
+			infotext += " notifyqueue: %s Messages" % (notifyqueue)
+
+		perfdata = [ ( "inqueue", saveint(inqueue), inqueuewarn, inqueuecrit ),
+				( "outqueue", saveint(outqueue), outqueuewarn, outqueuecrit ),
+				( "deferredqueue", saveint(deferredqueue), deferredqueuewarn, deferredqueuecrit ),
+				( "notifyqueue", saveint(notifyqueue), notifyqueuewarn, notifyqueuecrit ) ]
+
+		output = severity + " - " + infotext
+		return (rc, output, perfdata)
+	return (3, "UNKNOWN - item not found in snmp data")
+
+check_info['barra_queues'] = \
+	  (check_barra_queues, "%s", 1, inventory_barra_queues)
+
+
+snmp_info['barra_queues'] = [ 
+	( ".1.3.6.1.4.1.20632.2",[
+		2, # "inQueueSize"
+		3, # "outQueueSize"
+		4, # "deferredQueueSize"
+		8, # "notifyQueueSize"
+		]
+	),
+]
+
+snmp_scan_functions["barra_queues"] = \
+lambda oid: "barracuda" in oid(".1.3.6.1.2.1.1.1.0").lower()

@@ -1,0 +1,105 @@
+check_default_levels["barra_storage"] = "barra_storage_default_levels"
+
+factory_settings["barra_storage_default_levels"] = {
+	"firmware" : (80, 90),
+	"maillog" : (80, 90)
+}
+
+def inventory_barra_storage (info):
+
+	# Debug: lets see how the data we get looks like
+	#import pprint
+	#if info[0]:
+	#	pprint.pprint(info[0])
+	#	pprint.pprint(len(info[0][0]))
+	#return []
+	
+	inventory = []
+
+	for firmware, maillog in info[0]:
+		inventory.append( ("Cuda Storage", {}) )
+
+	return inventory
+
+def check_barra_storage (item, params, info):
+	# Debug: lets see how the data we get looks like
+	#import pprint
+	#if info[0]:
+	#	pprint.pprint(info[0])
+	#	pprint.pprint(len(info[0][0]))
+	#return []
+
+	if len(info) != 1:
+		return(3, "UNKNOWN - Invalid output from Agent")
+
+	moduleinfo = {}
+	perfdata = []
+	severity = "OK"
+	rc = 0
+	infotext = "Storage"
+
+	# Get warn/crit values
+	firmwareparams = params.get("firmware")
+	if firmwareparams == None:
+		firmwarewarn, firmwarecrit = None, None
+	else:
+		firmwarewarn, firmwarecrit = firmwareparams
+
+	maillogparams = params.get("maillog")
+	if maillogparams == None:
+		maillogwarn, maillogcrit = None, None
+	else:
+		maillogwarn, maillogcrit = maillogparams
+
+	for firmware, maillog in info[0]:
+		# compare firmware measurement value against warn, crit thresholds
+		if firmwarecrit and firmwarewarn:
+			if saveint(firmware) >= firmwarecrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " firmware: %s Percent (!!)," % (firmware)
+			elif saveint(firmware) >= firmwarewarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " firmware: %s Percent (!)," % (firmware)
+			else:
+				infotext += " firmware: %s Percent," % (firmware)
+		else:
+			infotext += " firmware: %s Percent," % (firmware)
+
+		# compare maillog measurement value against warn, crit thresholds
+		if maillogcrit and maillogwarn:
+			if saveint(maillog) >= maillogcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " maillog: %s Percent (!!)," % (maillog)
+			elif saveint(maillog) >= maillogwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " maillog: %s Percent (!)," % (maillog)
+			else:
+				infotext += " maillog: %s Percent," % (maillog)
+		else:
+			infotext += " maillog: %s Percent," % (maillog)
+
+		perfdata = [ ( "firmware", saveint(firmware), firmwarewarn, firmwarecrit ),
+				( "maillog", saveint(maillog), maillogwarn, maillogcrit ) ]
+
+		output = severity + " - " + infotext
+		return (rc, output, perfdata)
+	return (3, "UNKNOWN - item not found in snmp data")
+
+check_info['barra_storage'] = \
+	  (check_barra_storage, "%s", 1, inventory_barra_storage)
+
+
+snmp_info['barra_storage'] = [ 
+	( ".1.3.6.1.4.1.20632.2",[
+		17, # "firmwareStorage"
+		18, # "maillogStorage"
+		]
+	),
+]
+
+snmp_scan_functions["barra_storage"] = \
+lambda oid: "barracuda" in oid(".1.3.6.1.2.1.1.1.0").lower()
