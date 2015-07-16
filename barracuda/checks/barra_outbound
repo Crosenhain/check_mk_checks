@@ -1,0 +1,256 @@
+check_default_levels["barra_Outbound"] = "barra_Outbound_default_levels"
+
+factory_settings["barra_Outbound_default_levels"] = {
+	"hourlyOutboundPolicyBlocked" : (5000, 10000),
+	"hourlyOutboundSpamBlocked" : (5000, 10000),
+	"hourlyOutboundVirusBlocked" : (5000, 10000),
+	"hourlyOutboundRateControlled" : (5000, 10000),
+	"hourlyOutboundQuarantined" : (5000, 10000),
+	"hourlyEncrypted" : (5000, 10000),
+	"hourlyRedirected" : (5000, 10000),
+	"hourlySent" : (5000, 10000)
+}
+
+def inventory_barra_Outbound (info):
+
+	# Debug: lets see how the data we get looks like
+	#import pprint
+	#if info[0]:
+	#	pprint.pprint(info[0])
+	#	pprint.pprint(len(info[0][0]))
+	#return []
+	
+	inventory = []
+
+	for hourlyOutboundPolicyBlocked, hourlyOutboundSpamBlocked, hourlyOutboundVirusBlocked, hourlyOutboundRateControlled, hourlyOutboundQuarantined, hourlyEncrypted, hourlyRedirected, hourlySent in info[0]:
+		inventory.append( ("Cuda Outbound", {}) )
+
+	return inventory
+
+
+
+def check_barra_Outbound (item, params, info):
+	# Debug: lets see how the data we get looks like
+	#import pprint
+	#if info[0]:
+	#	pprint.pprint(info[0])
+	#	pprint.pprint(len(info[0][0]))
+	#return []
+
+	if len(info) != 1:
+		return(3, "UNKNOWN - Invalid output from Agent")
+
+	moduleinfo = {}
+	perfdata = []
+	severity = "OK"
+	rc = 0
+	infotext = "Outbound Messages"
+
+	# Get warn/crit values
+	hourlyOutboundPolicyBlockedparams = params.get("hourlyOutboundPolicyBlocked")
+	if hourlyOutboundPolicyBlockedparams == None:
+		hourlyOutboundPolicyBlockedwarn, hourlyOutboundPolicyBlockedcrit = None, None
+	else:
+		hourlyOutboundPolicyBlockedwarn, hourlyOutboundPolicyBlockedcrit = hourlyOutboundPolicyBlockedparams
+
+	# Get warn/crit values
+	hourlyOutboundSpamBlockedparams = params.get("hourlyOutboundSpamBlocked")
+	if hourlyOutboundSpamBlockedparams == None:
+		hourlyOutboundSpamBlockedwarn, hourlyOutboundSpamBlockedcrit = None, None
+	else:
+		hourlyOutboundSpamBlockedwarn, hourlyOutboundSpamBlockedcrit = hourlyOutboundSpamBlockedparams
+
+	hourlyOutboundVirusBlockedparams = params.get("hourlyOutboundVirusBlocked")
+	if hourlyOutboundVirusBlockedparams == None:
+		hourlyOutboundVirusBlockedwarn, hourlyOutboundVirusBlockedcrit = None, None
+	else:
+		hourlyOutboundVirusBlockedwarn, hourlyOutboundVirusBlockedcrit = hourlyOutboundVirusBlockedparams
+
+	hourlyOutboundRateControlledparams = params.get("hourlyOutboundRateControlled")
+	if hourlyOutboundRateControlledparams == None:
+		hourlyOutboundRateControlledwarn, hourlyOutboundRateControlledcrit = None, None
+	else:
+		hourlyOutboundRateControlledwarn, hourlyOutboundRateControlledcrit = hourlyOutboundRateControlledparams
+
+	hourlyOutboundQuarantinedparams = params.get("hourlyOutboundQuarantined")
+	if hourlyOutboundQuarantinedparams == None:
+		hourlyOutboundQuarantinedwarn, hourlyOutboundQuarantinedcrit = None, None
+	else:
+		hourlyOutboundQuarantinedwarn, hourlyOutboundQuarantinedcrit = hourlyOutboundQuarantinedparams
+
+	hourlyEncryptedparams = params.get("hourlyEncrypted")
+	if hourlyEncryptedparams == None:
+		hourlyEncryptedwarn, hourlyEncryptedcrit = None, None
+	else:
+		hourlyEncryptedwarn, hourlyEncryptedcrit = hourlyEncryptedparams
+
+	hourlyRedirectedparams = params.get("hourlyRedirected")
+	if hourlyRedirectedparams == None:
+		hourlyRedirectedwarn, hourlyRedirectedcrit = None, None
+	else:
+		hourlyRedirectedwarn, hourlyRedirectedcrit = hourlyRedirectedparams
+
+	hourlySentparams = params.get("hourlySent")
+	if hourlySentparams == None:
+		hourlySentwarn, hourlySentcrit = None, None
+	else:
+		hourlySentwarn, hourlySentcrit = hourlySentparams
+
+
+
+	for hourlyOutboundPolicyBlocked, hourlyOutboundSpamBlocked, hourlyOutboundVirusBlocked, hourlyOutboundRateControlled, hourlyOutboundQuarantined, hourlyEncrypted, hourlyRedirected, hourlySent in info[0]:
+
+		# compare hourlyOutboundPolicyBlocked measurement value against warn, crit thresholds
+		if hourlyOutboundPolicyBlockedcrit and hourlyOutboundPolicyBlockedwarn:
+			if saveint(hourlyOutboundPolicyBlocked) >= hourlyOutboundPolicyBlockedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " hourlyOutboundPolicyBlocked: %s Messages (!!)," % (hourlyOutboundPolicyBlocked)
+			elif saveint(hourlyOutboundPolicyBlocked) >= hourlyOutboundPolicyBlockedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " hourlyOutboundPolicyBlocked: %s Messages (!)," % (hourlyOutboundPolicyBlocked)
+			else:
+				infotext += " hourlyOutboundPolicyBlocked: %s Messages," % (hourlyOutboundPolicyBlocked)
+		else:
+			infotext += " hourlyOutboundPolicyBlocked: %s Messages," % (hourlyOutboundPolicyBlocked)
+
+		# compare hourlyOutboundSpamBlocked measurement value against warn, crit thresholds
+		if hourlyOutboundSpamBlockedcrit and hourlyOutboundSpamBlockedwarn:
+			if saveint(hourlyOutboundSpamBlocked) >= hourlyOutboundSpamBlockedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " hourlyOutboundSpamBlocked: %s Messages (!!)," % (hourlyOutboundSpamBlocked)
+			elif saveint(hourlyOutboundSpamBlocked) >= hourlyOutboundSpamBlockedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " hourlyOutboundSpamBlocked: %s Messages (!)," % (hourlyOutboundSpamBlocked)
+			else:
+				infotext += " hourlyOutboundSpamBlocked: %s Messages," % (hourlyOutboundSpamBlocked)
+		else:
+			infotext += " hourlyOutboundSpamBlocked: %s Messages," % (hourlyOutboundSpamBlocked)
+
+		# compare hourlyOutboundVirusBlocked measurement value against warn, crit thresholds
+		if hourlyOutboundVirusBlockedcrit and hourlyOutboundVirusBlockedwarn:
+			if saveint(hourlyOutboundVirusBlocked) >= hourlyOutboundVirusBlockedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " hourlyOutboundVirusBlocked: %s Messages (!!)," % (hourlyOutboundVirusBlocked)
+			elif saveint(hourlyOutboundVirusBlocked) >= hourlyOutboundVirusBlockedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " hourlyOutboundVirusBlocked: %s Messages (!)," % (hourlyOutboundVirusBlocked)
+			else:
+				infotext += " hourlyOutboundVirusBlocked: %s Messages," % (hourlyOutboundVirusBlocked)
+		else:
+			infotext += " hourlyOutboundVirusBlocked: %s Messages," % (hourlyOutboundVirusBlocked)
+
+		# compare hourlyOutboundRateControlled measurement value against warn, crit thresholds
+		if hourlyOutboundRateControlledcrit and hourlyOutboundRateControlledwarn:
+			if saveint(hourlyOutboundRateControlled) >= hourlyOutboundRateControlledcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " hourlyOutboundRateControlled: %s Messages (!!)," % (hourlyOutboundRateControlled)
+			elif saveint(hourlyOutboundRateControlled) >= hourlyOutboundRateControlledwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " hourlyOutboundRateControlled: %s Messages (!)," % (hourlyOutboundRateControlled)
+			else:
+				infotext += " hourlyOutboundRateControlled: %s Messages," % (hourlyOutboundRateControlled)
+		else:
+			infotext += " hourlyOutboundRateControlled: %s Messages," % (hourlyOutboundRateControlled)
+
+		# compare hourlyOutboundQuarantined measurement value against warn, crit thresholds
+		if hourlyOutboundQuarantinedcrit and hourlyOutboundQuarantinedwarn:
+			if saveint(hourlyOutboundQuarantined) >= hourlyOutboundQuarantinedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " hourlyOutboundQuarantined: %s Messages (!!)," % (hourlyOutboundQuarantined)
+			elif saveint(hourlyOutboundQuarantined) >= hourlyOutboundQuarantinedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " hourlyOutboundQuarantined: %s Messages (!)," % (hourlyOutboundQuarantined)
+			else:
+				infotext += " hourlyOutboundQuarantined: %s Messages," % (hourlyOutboundQuarantined)
+		else:
+			infotext += " hourlyOutboundQuarantined: %s Messages," % (hourlyOutboundQuarantined)
+
+		# compare hourlyEncrypted measurement value against warn, crit thresholds
+		if hourlyEncryptedcrit and hourlyEncryptedwarn:
+			if saveint(hourlyEncrypted) >= hourlyEncryptedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " hourlyEncrypted: %s Messages (!!)," % (hourlyEncrypted)
+			elif saveint(hourlyEncrypted) >= hourlyEncryptedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " hourlyEncrypted: %s Messages (!)," % (hourlyEncrypted)
+			else:
+				infotext += " hourlyEncrypted: %s Messages," % (hourlyEncrypted)
+		else:
+			infotext += " hourlyEncrypted: %s Messages," % (hourlyEncrypted)
+
+		# compare hourlyRedirected measurement value against warn, crit thresholds
+		if hourlyRedirectedcrit and hourlyRedirectedwarn:
+			if saveint(hourlyRedirected) >= hourlyRedirectedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " hourlyRedirected: %s Messages (!!)," % (hourlyRedirected)
+			elif saveint(hourlyRedirected) >= hourlyRedirectedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " hourlyRedirected: %s Messages (!)," % (hourlyRedirected)
+			else:
+				infotext += " hourlyRedirected: %s Messages," % (hourlyRedirected)
+		else:
+			infotext += " hourlyRedirected: %s Messages," % (hourlyRedirected)
+
+		# compare hourlySent measurement value against warn, crit thresholds
+		if hourlySentcrit and hourlySentwarn:
+			if saveint(hourlySent) >= hourlySentcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " hourlySent: %s Messages (!!)," % (hourlySent)
+			elif saveint(hourlySent) >= hourlySentwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " hourlySent: %s Messages (!)," % (hourlySent)
+			else:
+				infotext += " hourlySent: %s Messages," % (hourlySent)
+		else:
+			infotext += " hourlySent: %s Messages," % (hourlySent)
+
+
+		perfdata = [ ( "hourlyOutboundPolicyBlocked", saveint(hourlyOutboundPolicyBlocked), hourlyOutboundPolicyBlockedwarn, hourlyOutboundPolicyBlockedcrit ),
+				( "hourlyOutboundSpamBlocked", saveint(hourlyOutboundSpamBlocked), hourlyOutboundSpamBlockedwarn, hourlyOutboundSpamBlockedcrit ),
+				( "hourlyOutboundVirusBlocked", saveint(hourlyOutboundVirusBlocked), hourlyOutboundVirusBlockedwarn, hourlyOutboundVirusBlockedcrit ),
+				( "hourlyOutboundRateControlled", saveint(hourlyOutboundRateControlled), hourlyOutboundRateControlledwarn, hourlyOutboundRateControlledcrit ),
+				( "hourlyOutboundQuarantined", saveint(hourlyOutboundQuarantined), hourlyOutboundQuarantinedwarn, hourlyOutboundQuarantinedcrit ),
+				( "hourlyEncrypted", saveint(hourlyEncrypted), hourlyEncryptedwarn, hourlyEncryptedcrit ),
+				( "hourlyRedirected", saveint(hourlyRedirected), hourlyRedirectedwarn, hourlyRedirectedcrit ),
+				( "hourlySent", saveint(hourlySent), hourlySentwarn, hourlySentcrit ) ]
+
+		output = severity + " - " + infotext
+		return (rc, output, perfdata)
+	return (3, "UNKNOWN - item not found in snmp data")
+
+check_info['barra_Outbound'] = \
+	  (check_barra_Outbound, "%s", 1, inventory_barra_Outbound)
+
+
+snmp_info['barra_Outbound'] = [ 
+	( ".1.3.6.1.4.1.20632.2",[
+		40, # "hourlyOutboundPolicyBlocked"
+		43, # "hourlyOutboundSpamBlocked"
+		46, # "hourlyOutboundVirusBlocked"
+		49, # "hourlyOutboundRateControlled"
+		52, # "hourlyOutboundQuarantined"
+		55, # "hourlyEncrypted"
+		58, # "hourlyRedirected"
+		61, # "hourlySent"
+		]
+	),
+]
+
+snmp_scan_functions["barra_Outbound"] = \
+lambda oid: "barracuda" in oid(".1.3.6.1.2.1.1.1.0").lower()
