@@ -50,21 +50,21 @@ def check_barra_systemload (item, params, info):
 	for systemload in info[0]:
 		# compare systemload measurement value against warn, crit thresholds
 		if systemloadcrit and systemloadwarn:
-			if saveint(systemload) >= systemloadcrit:
+			if saveint(systemload[0]) >= systemloadcrit:
 				severity = "CRITICAL"
 				rc = 2
-				infotext += " %s Percent (!!)" % (saveint(systemload))
-			elif saveint(systemload) >= systemloadwarn:
+				infotext += " %s Percent (!!)" % (saveint(systemload[0]))
+			elif saveint(systemload[0]) >= systemloadwarn:
 				severity = "WARNING"
 				rc = 1
-				infotext += " %s Percent (!)" % (saveint(systemload))
+				infotext += " %s Percent (!)" % (saveint(systemload[0]))
 			else:
-				infotext += " %s Percent" % (saveint(systemload))
+				infotext += " %s Percent" % (saveint(systemload[0]))
 		else:
-			infotext += " %s Percent" % (saveint(systemload))
+			infotext += " %s Percent" % (saveint(systemload[0]))
 
 
-		perfdata = [ ( "systemload", saveint(systemload), systemloadwarn, systemloadcrit ) ]
+		perfdata = [ ( "systemload", saveint(systemload[0]), systemloadwarn, systemloadcrit ) ]
 
 		output = severity + " - " + infotext
 		return (rc, output, perfdata)

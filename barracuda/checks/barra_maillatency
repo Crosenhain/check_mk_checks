@@ -50,21 +50,21 @@ def check_barra_maillatency (item, params, info):
 	for maillatency in info[0]:
 		# compare maillatency measurement value against warn, crit thresholds
 		if maillatencycrit and maillatencywarn:
-			if saveint(maillatency) >= maillatencycrit:
+			if saveint(maillatency[0]) >= maillatencycrit:
 				severity = "CRITICAL"
 				rc = 2
-				infotext += " %s seconds (!!)" % (saveint(maillatency))
-			elif saveint(maillatency) >= maillatencywarn:
+				infotext += " %s seconds (!!)" % (saveint(maillatency[0]))
+			elif saveint(maillatency[0]) >= maillatencywarn:
 				severity = "WARNING"
 				rc = 1
-				infotext += " %s seconds (!)" % (saveint(maillatency))
+				infotext += " %s seconds (!)" % (saveint(maillatency[0]))
 			else:
-				infotext += " %s seconds" % (saveint(maillatency))
+				infotext += " %s seconds" % (saveint(maillatency[0]))
 		else:
-			infotext += " %s seconds" % (saveint(maillatency))
+			infotext += " %s seconds" % (saveint(maillatency[0]))
 
 
-		perfdata = [ ( "maillatency", saveint(maillatency), maillatencywarn, maillatencycrit ) ]
+		perfdata = [ ( "maillatency", saveint(maillatency[0]), maillatencywarn, maillatencycrit ) ]
 
 		output = severity + " - " + infotext
 		return (rc, output, perfdata)
