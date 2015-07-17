@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
 check_default_levels["barra_queues"] = "barra_queues_default_levels"
 
 factory_settings["barra_queues_default_levels"] = {

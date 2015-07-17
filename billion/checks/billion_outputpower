@@ -1,0 +1,109 @@
+#!/usr/bin/python
+
+check_default_levels["billion_outputpower"] = "billion_outputpower_default_levels"
+
+factory_settings["billion_outputpower_default_levels"] = {
+	"download" : (10, 5),
+	"upload" : (10, 5)
+}
+
+def inventory_billion_outputpower (info):
+
+	# Debug: lets see how the data we get looks like
+	#import pprint
+	#if info[0]:
+	#	pprint.pprint(info[0])
+	#	pprint.pprint(len(info[0][0]))
+	#return []
+	
+	inventory = []
+
+	for upload, download in info[0]:
+		inventory.append( ("Billion Output Power", {}) )
+
+	return inventory
+
+def check_billion_outputpower (item, params, info):
+	# Debug: lets see how the data we get looks like
+	#import pprint
+	#if info[0]:
+	#	pprint.pprint(info[0])
+	#	pprint.pprint(len(info[0][0]))
+	#return []
+
+	if len(info) != 1:
+		return(3, "UNKNOWN - Invalid output from Agent")
+
+	moduleinfo = {}
+	perfdata = []
+	severity = "OK"
+	rc = 0
+	infotext = "Output Power"
+
+	# Get warn/crit values
+	downloadparams = params.get("download")
+	if downloadparams == None:
+		downloadwarn, downloadcrit = None, None
+	else:
+		downloadwarn, downloadcrit = downloadparams
+
+	uploadparams = params.get("upload")
+	if uploadparams == None:
+		uploadwarn, uploadcrit = None, None
+	else:
+		uploadwarn, uploadcrit = uploadparams
+
+	for download, upload in info[0]:
+		adownload = int(download)*0.1
+		# compare download measurement value against warn, crit thresholds
+		if downloadcrit and downloadwarn:
+			if saveint(adownload) <= downloadcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " download: %s dBm (!!)," % (adownload)
+			elif saveint(adownload) <= downloadwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " download: %s dBm (!)," % (adownload)
+			else:
+				infotext += " download: %s dBm," % (adownload)
+		else:
+			infotext += " download: %s dBm," % (adownload)
+
+		aupload = int(upload)*0.1
+		# compare upload measurement value against warn, crit thresholds
+		if uploadcrit and uploadwarn:
+			if saveint(aupload) <= uploadcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " upload: %s dBm (!!)," % (aupload)
+			elif saveint(aupload) <= uploadwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " upload: %s dBm (!)," % (aupload)
+			else:
+				infotext += " upload: %s dBm," % (aupload)
+		else:
+			infotext += " upload: %s dBm," % (aupload)
+
+		perfdata = [ ( "download", saveint(adownload), downloadwarn, downloadcrit ),
+				( "upload", saveint(aupload), uploadwarn, uploadcrit ) ]
+
+		output = severity + " - " + infotext
+		return (rc, output, perfdata)
+	return (3, "UNKNOWN - item not found in snmp data")
+
+check_info['billion_outputpower'] = \
+	  (check_billion_outputpower, "%s", 1, inventory_billion_outputpower)
+
+
+snmp_info['billion_outputpower'] = [ 
+	( ".1.3.6.1.2.1.10.97.1.1.2.1.8",[
+		1, # "download"
+		2, # "upload"
+		]
+	),
+]
+
+snmp_scan_functions["billion_outputpower"] = \
+lambda oid: "billion" in oid(".1.3.6.1.2.1.1.5.0").lower()

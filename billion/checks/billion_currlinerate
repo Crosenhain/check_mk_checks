@@ -1,0 +1,107 @@
+#!/usr/bin/python
+
+check_default_levels["billion_currlinerate"] = "billion_currlinerate_default_levels"
+
+factory_settings["billion_currlinerate_default_levels"] = {
+	"download" : (9500, 9000),
+	"upload" : (1000, 500)
+}
+
+def inventory_billion_currlinerate (info):
+
+	# Debug: lets see how the data we get looks like
+	#import pprint
+	#if info[0]:
+	#	pprint.pprint(info[0])
+	#	pprint.pprint(len(info[0][0]))
+	#return []
+	
+	inventory = []
+
+	for upload, download in info[0]:
+		inventory.append( ("Billion Current Line Rate", {}) )
+
+	return inventory
+
+def check_billion_currlinerate (item, params, info):
+	# Debug: lets see how the data we get looks like
+	#import pprint
+	#if info[0]:
+	#	pprint.pprint(info[0])
+	#	pprint.pprint(len(info[0][0]))
+	#return []
+
+	if len(info) != 1:
+		return(3, "UNKNOWN - Invalid output from Agent")
+
+	moduleinfo = {}
+	perfdata = []
+	severity = "OK"
+	rc = 0
+	infotext = "Current Line Rate"
+
+	# Get warn/crit values
+	downloadparams = params.get("download")
+	if downloadparams == None:
+		downloadwarn, downloadcrit = None, None
+	else:
+		downloadwarn, downloadcrit = downloadparams
+
+	uploadparams = params.get("upload")
+	if uploadparams == None:
+		uploadwarn, uploadcrit = None, None
+	else:
+		uploadwarn, uploadcrit = uploadparams
+
+	for download, upload in info[0]:
+		# compare download measurement value against warn, crit thresholds
+		if downloadcrit and downloadwarn:
+			if saveint(download) <= downloadcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " download: %s kbps (!!)," % (download)
+			elif saveint(download) <= downloadwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " download: %s kbps (!)," % (download)
+			else:
+				infotext += " download: %s kbps," % (download)
+		else:
+			infotext += " download: %s kbps," % (download)
+
+		# compare upload measurement value against warn, crit thresholds
+		if uploadcrit and uploadwarn:
+			if saveint(upload) <= uploadcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " upload: %s kbps (!!)," % (upload)
+			elif saveint(upload) <= uploadwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " upload: %s kbps (!)," % (upload)
+			else:
+				infotext += " upload: %s kbps," % (upload)
+		else:
+			infotext += " upload: %s kbps," % (upload)
+
+		perfdata = [ ( "download", saveint(download), downloadwarn, downloadcrit ),
+				( "upload", saveint(upload), uploadwarn, uploadcrit ) ]
+
+		output = severity + " - " + infotext
+		return (rc, output, perfdata)
+	return (3, "UNKNOWN - item not found in snmp data")
+
+check_info['billion_currlinerate'] = \
+	  (check_billion_currlinerate, "%s", 1, inventory_billion_currlinerate)
+
+
+snmp_info['billion_currlinerate'] = [ 
+	( ".1.3.6.1.2.1.10.97.1.1.2.1.10",[
+		1, # "download"
+		2, # "upload"
+		]
+	),
+]
+
+snmp_scan_functions["billion_currlinerate"] = \
+lambda oid: "billion" in oid(".1.3.6.1.2.1.1.5.0").lower()
