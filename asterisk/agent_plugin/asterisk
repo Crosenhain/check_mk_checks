@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+use warnings;
+use strict;
+
+sub dopeer {
+  my $peeroutput = `asterisk -rx 'sip show peers'`;
+  my $peerstatus = $?;
+
+  print "<<<asterisk_peers>>>\n";
+  if ($peerstatus) {
+    print "50 Unable to connect to remote asterisk\n";
+  } else {
+    my @peeroutput = split (/\n/,$peeroutput);
+    map{ 
+      if ( m/^(.{26})(.{40})(.{19})(.{9})(.*)$/ ) {
+        my $name   = $1;
+        my $host   = $2;
+        my $other  = $3;
+        my $port   = $4;
+        my $status = $5;
+
+        $name   =~ s/^([^ ]*).*$/$1/;
+        $host   =~ s/^([^ ]*).*$/$1/;
+        $port   =~ s/^([^ ]*).*$/$1/;
+
+	my $statusname = $status;
+	my $latency = 0;
+
+        if ($status =~ m/([^ ]+) \(([0-9]+) ms\)/) {
+	  $statusname = $1;
+	  $latency = $2;
+        }
+
+        print "$name\t$host\t$port\t$statusname\t$latency\n";
+      } else {
+        print "50 Unable to connect to remote asterisk\n";
+      }
+    } @peeroutput[1 .. $#peeroutput-1];
+  }
+}
+
+
+sub doreg {
+  my $regoutput = `asterisk -rx 'sip show registry'`;
+  my $regstatus = $?;
+
+  print "<<<asterisk_registry>>>\n";
+  if ($regstatus) {
+    print "50 Unable to connect to remote asterisk\n";
+  } else {
+    my @regoutput = split (/\n/,$regoutput);
+    map{ 
+      if ( m/^(.{40})(.{7})(.{15})(.{8})(.{21})(.{25})$/ ) {
+        my $host    = $1;
+        my $dnsmgr  = $2;
+        my $user    = $3;
+        my $refresh = $4;
+        my $state   = $5;
+        my $regtime = $6;
+
+        $host    =~ s/^([^ ]*).*$/$1/;
+        $user    =~ s/^([^ ]*).*$/$1/;
+        $state   =~ s/^([^ ]*).*$/$1/;
+        $regtime =~ s/^([^ ]*).*$/$1/;
+
+        print "$user\@$host\t$state\n";
+      } else {
+        print "50 Unable to connect to remote asterisk\n";
+      }
+    } @regoutput[1 .. $#regoutput-1];
+  }
+}
+
+doreg;
+dopeer;

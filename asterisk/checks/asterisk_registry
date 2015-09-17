@@ -1,0 +1,19 @@
+#!/usr/bin/python
+def inventory_asterisk_registry(info):
+  for line in info:
+    account = line[0]
+    yield account, None
+
+def check_asterisk_registry(item, params, info):
+  for line in info:
+    if line[0] == item:
+      if (line[1] == "Registered"):
+        return (0, "State is %s" % line[1])
+      else:
+        return (2, "State is %s (!!)" % line[1])
+
+check_info["asterisk_registry"] = {
+    'check_function':            check_asterisk_registry,
+    'inventory_function':        inventory_asterisk_registry,
+    'service_description':       'Asterisk registry %s',
+}
