@@ -9,7 +9,7 @@ factory_settings["vdp_backups_default_levels"] = {
 
 def inventory_vdp_backups(info):
   for line in info:
-    host = line[0]
+    host = "%s %s" % (line[0],line[8])
     yield host, None
 
 def check_vdp_backups(item, params, info):
@@ -22,7 +22,8 @@ def check_vdp_backups(item, params, info):
     vdpBackupwarn, vdpBackupcrit = vdpBackupparams
 
   for line in info:
-    if line[0] == item:
+    desc = "%s %s" % (line[0],line[8])
+    if desc == item:
       perfdata = [ ( "vdpBackupElapsedTime", line[9] ) ]
       if line[6] == "Activity completed successfully.":
         return (0, "%s, elapsed time is %s" % (line[6], line[9]), perfdata)
