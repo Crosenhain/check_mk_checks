@@ -1,0 +1,34 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 2 -*-
+
+check_default_levels["vdp_backups"] = "vdp_backups_default_levels"
+
+factory_settings["vdp_backups_default_levels"] = {
+  "vdpBackupElapsedTime" : (1500, 2000)
+}
+
+def inventory_vdp_backups(info):
+  for line in info:
+    host = line[0]
+    yield host, None
+
+def check_vdp_backups(item, params, info):
+
+  # Get warn/crit values
+  vdpBackupparams = params.get("vdpBackupElapsedTime")
+  if vdpBackupparams == None:
+    vdpBackupwarn, vdpBackupcrit = None, None
+  else:
+    vdpBackupwarn, vdpBackupcrit = vdpBackupparams
+
+  for line in info:
+    if line[0] == item:
+      perfdata = [ ( "vdpBackupElapsedTime", line[9] ) ]
+      if line[6] == "Activity completed successfully.":
+        return (0, "%s, elapsed time is %s" % (line[6], line[9]), perfdata)
+      else:
+        return (2, "State is %s (!!)" % line[6], perfdata)
+
+  return (3, "UNKNOWN - item not found in snmp data")
+
+check_info['vdp_backups'] = (check_vdp_backups, "VDP Backup %s", 1, inventory_vdp_backups)
