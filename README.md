@@ -15,6 +15,9 @@ The Barracuda checks have been tested against a virtual spam firewall - so I did
 ## vdp
 I have used this check against a VMWare VDP appliance, which appears to be Suse Linux underneath. The agent plugin just runs a psql query, formats it nicely, and then adds it to the check_mk-agent output.
 
+## apc
+Temperature and humidity monitoring via an APC Environmental Monitoring Unit using SNMP.
+
 ##Notes
 
 I use OMD, which means I place these files in the individual sites, eg "/omd/sites/sitename/local/share/check_mk/checks"
