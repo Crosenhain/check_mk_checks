@@ -2,7 +2,7 @@
 # Gather thermal information provided e.g. by acpi
 # At the moment only supporting thermal sensors
 if ls /sys/devices/platform/coretemp.0 >/dev/null 2>&1; then
-    echo "<<<coretemp:sep(124)>>>"
+    echo "<<<core_temp:sep(124)>>>"
     for F in /sys/devices/platform/coretemp.0/hwmon/hwmon1; do
 	for T in $F/temp*_label; do
 		echo -n `cat $T | tr -d \\n` "|"
