@@ -1,0 +1,39 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 2 -*-
+
+check_default_levels["coretemp"] = "coretemp_default_levels"
+
+factory_settings["coretemp_default_levels"] = {
+  "coretemp" : (50, 60)
+}
+
+def inventory_coretemp(info):
+  for line in info:
+    core = line[0]
+    yield core, None
+
+def check_coretemp(item, params, info):
+
+  # Get warn/crit values
+  coretempparams = params.get("coretemp")
+  if coretempparams == None:
+    coretempwarn, coretempcrit = None, None
+  else:
+    coretempwarn, coretempcrit = coretempparams
+
+  for line in info:
+    if line[0] == item:
+      temperature = saveint(line[1])/1000
+      perfdata = [ ( "coretemp", temperature, coretempwarn, coretempcrit ) ]
+      infotext = "%sC (warn/crit above %.1f/%.1f C)" % \
+                ( temperature, coretempwarn, coretempcrit)
+      if temperature >= coretempcrit:
+          return (2, "Temperature is: " + infotext, perfdata )
+      elif temperature >= coretempwarn:
+          return (1, "Temperature is: " + infotext, perfdata )
+      else:
+          return (0, "Temperature is: " + infotext, perfdata )
+
+  return (3, "UNKNOWN - item not found in snmp data")
+
+check_info['coretemp'] = (check_coretemp, "coretemp %s", 1, inventory_coretemp)
