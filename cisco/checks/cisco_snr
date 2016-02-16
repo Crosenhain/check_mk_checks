@@ -60,11 +60,11 @@ def check_cisco_snr (item, params, info):
                 adownload = int(download['dsnr'][0])*0.1
                 # compare download measurement value against warn, crit thresholds
                 if downloadcrit and downloadwarn:
-                        if saveint(adownload) >= downloadcrit:
+                        if saveint(adownload) <= downloadcrit:
                                 severity = "CRITICAL"
                                 rc = 2
                                 infotext += " download: %s dBm (!!)," % (adownload)
-                        elif saveint(adownload) >= downloadwarn:
+                        elif saveint(adownload) <= downloadwarn:
                                 severity = "WARNING"
                                 rc = 1
                                 infotext += " download: %s dBm (!)," % (adownload)
@@ -76,11 +76,11 @@ def check_cisco_snr (item, params, info):
                 aupload = int(upload['usnr'][0])*0.1
                 # compare upload measurement value against warn, crit thresholds
                 if uploadcrit and uploadwarn:
-                        if saveint(aupload) >= uploadcrit:
+                        if saveint(aupload) <= uploadcrit:
                                 severity = "CRITICAL"
                                 rc = 2
                                 infotext += " upload: %s dBm (!!)," % (aupload)
-                        elif saveint(aupload) >= uploadwarn:
+                        elif saveint(aupload) <= uploadwarn:
                                 severity = "WARNING"
                                 rc = 1
                                 infotext += " upload: %s dBm (!)," % (aupload)
