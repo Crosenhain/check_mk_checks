@@ -1,0 +1,107 @@
+#!/usr/bin/python
+
+check_default_levels["cisco_snr"] = "cisco_snr_default_levels"
+
+factory_settings["cisco_snr_default_levels"] = {
+        "download" : (14, 16),
+        "upload" : (24, 26)
+}
+
+def parse_cisco_snr(info):
+    from collections import defaultdict
+    download, upload = info
+    downloads = defaultdict(list)
+    for x in download:
+        downloads["dsnr"].append(x[1])
+
+    uploads = defaultdict(list)
+    for y in upload:
+        uploads["usnr"].append(y[1])
+
+    # Create main dictionary (only of FRUs)
+    snr = []
+    snr.append( ( downloads, uploads ) )
+    return snr
+
+def inventory_cisco_snr (info):
+        inventory = []
+
+        for upload, download in info[1]:
+                inventory.append( ("Cisco Snr", {}) )
+
+        return inventory
+
+def check_cisco_snr (item, params, info):
+        if len(info[0]) != 1:
+                return(3, "UNKNOWN - Invalid output from Agent")
+
+        moduleinfo = {}
+        perfdata = []
+        severity = "OK"
+        rc = 0
+        infotext = "Snr"
+
+        # Get warn/crit values
+        downloadparams = params.get("download")
+        if downloadparams == None:
+                downloadwarn, downloadcrit = None, None
+        else:
+                downloadwarn, downloadcrit = downloadparams
+
+        uploadparams = params.get("upload")
+        if uploadparams == None:
+                uploadwarn, uploadcrit = None, None
+        else:
+                uploadwarn, uploadcrit = uploadparams
+
+        snr = parse_cisco_snr(info)
+        
+        for download, upload in snr:
+                adownload = int(download['dsnr'][0])*0.1
+                # compare download measurement value against warn, crit thresholds
+                if downloadcrit and downloadwarn:
+                        if saveint(adownload) >= downloadcrit:
+                                severity = "CRITICAL"
+                                rc = 2
+                                infotext += " download: %s dBm (!!)," % (adownload)
+                        elif saveint(adownload) >= downloadwarn:
+                                severity = "WARNING"
+                                rc = 1
+                                infotext += " download: %s dBm (!)," % (adownload)
+                        else:
+                                infotext += " download: %s dBm," % (adownload)
+                else:
+                        infotext += " download: %s dBm," % (adownload)
+
+                aupload = int(upload['usnr'][0])*0.1
+                # compare upload measurement value against warn, crit thresholds
+                if uploadcrit and uploadwarn:
+                        if saveint(aupload) >= uploadcrit:
+                                severity = "CRITICAL"
+                                rc = 2
+                                infotext += " upload: %s dBm (!!)," % (aupload)
+                        elif saveint(aupload) >= uploadwarn:
+                                severity = "WARNING"
+                                rc = 1
+                                infotext += " upload: %s dBm (!)," % (aupload)
+                        else:
+                                infotext += " upload: %s dBm," % (aupload)
+                else:
+                        infotext += " upload: %s dBm," % (aupload)
+
+                perfdata = [ ( "download", saveint(adownload), downloadwarn, downloadcrit ),
+                                ( "upload", saveint(aupload), uploadwarn, uploadcrit ) ]
+
+                output = severity + " - " + infotext
+                return (rc, output, perfdata)
+        return (3, "UNKNOWN - item not found in snmp data")
+
+check_info['cisco_snr'] = \
+          (check_cisco_snr, "%s", 1, inventory_cisco_snr)
+
+snmp_info['cisco_snr'] = [
+        ( ".1.3.6.1.2.1.10.94.1.1.2.1.4", [OID_END,12] ),
+        ( ".1.3.6.1.2.1.10.94.1.1.3.1.4", [OID_END,12] ),]
+
+snmp_scan_functions["cisco_snr"] = \
+lambda oid: "Cisco IOS" in oid(".1.3.6.1.2.1.1.1.0")
