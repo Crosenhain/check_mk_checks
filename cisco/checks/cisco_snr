@@ -3,8 +3,8 @@
 check_default_levels["cisco_snr"] = "cisco_snr_default_levels"
 
 factory_settings["cisco_snr_default_levels"] = {
-        "download" : (14, 16),
-        "upload" : (24, 26)
+        "download" : (6, 4),
+        "upload" : (6, 4)
 }
 
 def parse_cisco_snr(info):
