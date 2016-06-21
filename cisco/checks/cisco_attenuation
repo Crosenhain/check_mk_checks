@@ -52,8 +52,8 @@ def check_cisco_attenuation (item, params, info):
                 uploadwarn, uploadcrit = None, None
         else:
                 uploadwarn, uploadcrit = uploadparams
-
-	    att = parse_cisco_attenuation(info)
+                
+	att = parse_cisco_attenuation(info)
 
         for download, upload in att:
                 adownload = int(download['datt'][0])*0.1
