@@ -1,0 +1,48 @@
+#!/usr/bin/python
+from subprocess import call
+import sys, getopt
+from os.path import expanduser
+
+def usage():
+	sys.stderr.write("""Check_MK Barracuda <300 Agent
+USAGE: agent_barracudamini --host=HOST --username=USERNAME --password=PASSWORD
+
+PASSWORD is encoded - log into the Barracuda web interface and look for it in the address bar... 
+""")
+	sys.exit(1)
+
+short_options = 'h:'
+long_options  = ['help', 'host=', 'username=', 'password=']
+
+host = None
+username = None
+password = None
+
+try:
+	opts, args = getopt.getopt(sys.argv[1:], short_options, long_options)
+except getopt.GetoptError, err:
+	sys.stderr.write("%s\n" % err)
+	sys.exit(1)
+
+for o,a in opts:
+	if o in [ '--host' ]:
+		host = a
+	elif o in [ '--username' ]:
+		username = a
+	elif o in [ '--password']:
+		password = a
+	elif o in [ '-h', '--help' ]:
+		usage()
+
+if len(args) > 0 or not host or not username or not password:
+	usage()
+
+
+home = expanduser("~")
+path = home+"/local/share/check_mk/agents/special/barracudamini/agent_barracudamini.rb"
+
+try:
+	call(["ruby", "-W0", path, host, username, password])
+except Exception, e:
+	sys.stderr.write("Error %s" % e)
+	sys.exit(1)

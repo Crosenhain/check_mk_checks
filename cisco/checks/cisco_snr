@@ -27,7 +27,7 @@ def inventory_cisco_snr (info):
         inventory = []
 
         for upload, download in info[1]:
-                inventory.append( ("Cisco Snr", {}) )
+                inventory.append( ("Cisco Snr", "cisco_snr_default_levels") )
 
         return inventory
 

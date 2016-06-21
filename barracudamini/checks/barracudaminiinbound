@@ -1,0 +1,180 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+check_default_levels["barracudaminiinbound"] = "barracudaminiinbound_default_levels"
+
+factory_settings["barracudaminiinbound_default_levels"] = {
+	"InboundBlocked" : (5000, 10000),
+	"InboundVirusBlocked" : (5000, 10000),
+	"InboundRateLimited" : (5000, 10000),
+	"InboundQuarantined" : (5000, 10000),
+	"InboundTagged" : (5000, 10000),
+	"InboundAllowed" : (5000, 10000)
+}
+
+def inventory_barracudaminiinbound (info):
+	inventory = []
+	for InboundBlocked, InboundVirusBlocked, InboundRateLimited, InboundQuarantined, InboundTagged, InboundAllowed in info:
+			inventory.append( ("Barracuda Inbound", {}) )
+	return inventory
+
+
+def check_barracudaminiinbound(item, params, info):
+	if len(info) != 1:
+		return(3, "UNKNOWN - Invalid output from Agent")
+
+	moduleinfo = {}
+	perfdata = []
+	severity = "OK"
+	rc = 0
+	infotext = "Inbound Messages"
+
+	# Get warn/crit values
+	InboundBlockedparams = params.get("InboundBlocked")
+	if InboundBlockedparams == None:
+		InboundBlockedwarn, InboundBlockedcrit = None, None
+	else:
+		InboundBlockedwarn, InboundBlockedcrit = InboundBlockedparams
+
+	InboundVirusBlockedparams = params.get("InboundVirusBlocked")
+	if InboundVirusBlockedparams == None:
+		InboundVirusBlockedwarn, InboundVirusBlockedcrit = None, None
+	else:
+		InboundVirusBlockedwarn, InboundVirusBlockedcrit = InboundVirusBlockedparams
+
+	InboundRateLimitedparams = params.get("InboundRateLimited")
+	if InboundRateLimitedparams == None:
+		InboundRateLimitedwarn, InboundRateLimitedcrit = None, None
+	else:
+		InboundRateLimitedwarn, InboundRateLimitedcrit = InboundRateLimitedparams
+
+	InboundQuarantinedparams = params.get("InboundQuarantined")
+	if InboundQuarantinedparams == None:
+		InboundQuarantinedwarn, InboundQuarantinedcrit = None, None
+	else:
+		InboundQuarantinedwarn, InboundQuarantinedcrit = InboundQuarantinedparams
+
+	InboundTaggedparams = params.get("InboundTagged")
+	if InboundTaggedparams == None:
+		InboundTaggedwarn, InboundTaggedcrit = None, None
+	else:
+		InboundTaggedwarn, InboundTaggedcrit = InboundTaggedparams
+
+	InboundAllowedparams = params.get("InboundAllowed")
+	if InboundAllowedparams == None:
+		InboundAllowedwarn, InboundAllowedcrit = None, None
+	else:
+		InboundAllowedwarn, InboundAllowedcrit = InboundAllowedparams
+
+	for InboundBlocked, InboundVirusBlocked, InboundRateLimited, InboundQuarantined, InboundTagged, InboundAllowed in info:
+
+		# compare InboundBlocked measurement value against warn, crit thresholds
+		if InboundBlockedcrit and InboundBlockedwarn:
+			if saveint(InboundBlocked) >= InboundBlockedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " InboundBlocked: %s Messages (!!)," % (InboundBlocked)
+			elif saveint(InboundBlocked) >= InboundBlockedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " InboundBlocked: %s Messages (!)," % (InboundBlocked)
+			else:
+				infotext += " InboundBlocked: %s Messages," % (InboundBlocked)
+		else:
+			infotext += " InboundBlocked: %s Messages," % (InboundBlocked)
+
+		# compare InboundVirusBlocked measurement value against warn, crit thresholds
+		if InboundVirusBlockedcrit and InboundVirusBlockedwarn:
+			if saveint(InboundVirusBlocked) >= InboundVirusBlockedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " InboundVirusBlocked: %s Messages (!!)," % (InboundVirusBlocked)
+			elif saveint(InboundVirusBlocked) >= InboundVirusBlockedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " InboundVirusBlocked: %s Messages (!)," % (InboundVirusBlocked)
+			else:
+				infotext += " InboundVirusBlocked: %s Messages," % (InboundVirusBlocked)
+		else:
+			infotext += " InboundVirusBlocked: %s Messages," % (InboundVirusBlocked)
+
+		# compare InboundRateLimited measurement value against warn, crit thresholds
+		if InboundRateLimitedcrit and InboundRateLimitedwarn:
+			if saveint(InboundRateLimited) >= InboundRateLimitedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " InboundRateLimited: %s Messages (!!)," % (InboundRateLimited)
+			elif saveint(InboundRateLimited) >= InboundRateLimitedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " InboundRateLimited: %s Messages (!)," % (InboundRateLimited)
+			else:
+				infotext += " InboundRateLimited: %s Messages," % (InboundRateLimited)
+		else:
+			infotext += " InboundRateLimited: %s Messages," % (InboundRateLimited)
+
+		# compare InboundQuarantined measurement value against warn, crit thresholds
+		if InboundQuarantinedcrit and InboundQuarantinedwarn:
+			if saveint(InboundQuarantined) >= InboundQuarantinedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " InboundQuarantined: %s Messages (!!)," % (InboundQuarantined)
+			elif saveint(InboundQuarantined) >= InboundQuarantinedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " InboundQuarantined: %s Messages (!)," % (InboundQuarantined)
+			else:
+				infotext += " InboundQuarantined: %s Messages," % (InboundQuarantined)
+		else:
+			infotext += " InboundQuarantined: %s Messages," % (InboundQuarantined)
+
+		# compare InboundTagged measurement value against warn, crit thresholds
+		if InboundTaggedcrit and InboundTaggedwarn:
+			if saveint(InboundTagged) >= InboundTaggedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " InboundTagged: %s Messages (!!)," % (InboundTagged)
+			elif saveint(InboundTagged) >= InboundTaggedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " InboundTagged: %s Messages (!)," % (InboundTagged)
+			else:
+				infotext += " InboundTagged: %s Messages," % (InboundTagged)
+		else:
+			infotext += " InboundTagged: %s Messages," % (InboundTagged)
+
+		# compare Allowed measurement value against warn, crit thresholds
+		if InboundAllowedcrit and InboundAllowedwarn:
+			if saveint(InboundAllowed) >= InboundAllowedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " InboundAllowed: %s Messages (!!)," % (InboundAllowed)
+			elif saveint(InboundAllowed) >= InboundAllowedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " InboundAllowed: %s Messages (!)," % (InboundAllowed)
+			else:
+				infotext += " InboundAllowed: %s Messages," % (InboundAllowed)
+		else:
+			infotext += " InboundAllowed: %s Messages," % (InboundAllowed)
+
+
+		perfdata = [ ( "InboundBlocked", saveint(InboundBlocked), InboundBlockedwarn, InboundBlockedcrit ),
+				( "InboundVirusBlocked", saveint(InboundVirusBlocked), InboundVirusBlockedwarn, InboundVirusBlockedcrit ),
+				( "InboundRateLimited", saveint(InboundRateLimited), InboundRateLimitedwarn, InboundRateLimitedcrit ),
+				( "InboundQuarantined", saveint(InboundQuarantined), InboundQuarantinedwarn, InboundQuarantinedcrit ),
+				( "InboundTagged", saveint(InboundTagged), InboundTaggedwarn, InboundTaggedcrit ),
+				( "InboundAllowed", saveint(InboundAllowed), InboundAllowedwarn, InboundAllowedcrit ) ]
+
+		output = severity + " - " + infotext
+		return (rc, output, perfdata)
+	return (3, "UNKNOWN - item not found in agent data")
+
+check_info["barracudaminiinbound"] = {
+    "check_function"            : check_barracudaminiinbound,
+    "inventory_function"        : inventory_barracudaminiinbound,
+    "service_description"       : "Barracuda %s",
+    "default_levels_variable"   : "barracudaminiinbound",
+    "group"                     : "barracudaminiinbound",
+    "has_perfdata"              : True,
+}

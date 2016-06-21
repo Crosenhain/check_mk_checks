@@ -1,0 +1,66 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+check_default_levels["barracudaminiload"] = "barracudaminiload_default_levels"
+
+factory_settings["barracudaminiload_default_levels"] = {
+	"systemload" : (75, 90)
+}
+
+def inventory_barracudaminiload (info):
+	inventory = []
+
+	for systemload in info:
+		inventory.append( ("Barracuda System Load", {}) )
+
+	return inventory
+
+
+def check_barracudaminiload(item, params, info):
+	if len(info) != 1:
+		return(3, "UNKNOWN - Invalid output from Agent")
+
+	moduleinfo = {}
+	perfdata = []
+	severity = "OK"
+	rc = 0
+	infotext = "System Load"
+
+	# Get warn/crit values
+	systemloadparams = params.get("systemload")
+	if systemloadparams == None:
+		systemloadwarn, systemloadcrit = None, None
+	else:
+		systemloadwarn, systemloadcrit = systemloadparams
+
+	for systemload in info:
+		# compare systemload measurement value against warn, crit thresholds
+		if systemloadcrit and systemloadwarn:
+			if saveint(systemload[0]) >= systemloadcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " %s Percent (!!)" % (saveint(systemload[0]))
+			elif saveint(systemload[0]) >= systemloadwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " %s Percent (!)" % (saveint(systemload[0]))
+			else:
+				infotext += " %s Percent" % (saveint(systemload[0]))
+		else:
+			infotext += " %s Percent" % (saveint(systemload[0]))
+
+
+		perfdata = [ ( "systemload", saveint(systemload[0]), systemloadwarn, systemloadcrit ) ]
+
+		output = severity + " - " + infotext
+		return (rc, output, perfdata)
+	return (3, "UNKNOWN - item not found in agent data")
+
+check_info["barracudaminiload"] = {
+    "check_function"            : check_barracudaminiload,
+    "inventory_function"        : inventory_barracudaminiload,
+    "service_description"       : "Barracuda %s",
+    "default_levels_variable"   : "barracudaminiload",
+    "group"                     : "barracudaminiload",
+    "has_perfdata"              : True,
+}

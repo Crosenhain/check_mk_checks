@@ -1,0 +1,55 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+check_default_levels["barracudamini"] = "barracudamini_default_levels"
+
+factory_settings["barracudamini_default_levels"] = {
+	"InboundBlocked" : (5000, 10000),
+	"InboundVirusBlocked" : (5000, 10000),
+	"InboundRateLimited" : (5000, 10000),
+	"InboundQuarantined" : (5000, 10000),
+	"InboundTagged" : (5000, 10000),
+	"InboundAllowed" : (5000, 10000),
+	"OutboundPolicyBlocked" : (5000, 10000),
+	"OutboundSpamBlocked" : (5000, 10000),
+	"OutboundVirusBlocked" : (5000, 10000),
+	"OutboundRateLimited" : (5000, 10000),
+	"OutboundQuarantined" : (5000, 10000),
+	"OutboundEncrypted" : (5000, 10000),
+	"OutboundRedirected" : (5000, 10000),
+	"OutboundSent" : (5000, 10000),
+	"inqueue" : (50, 100),
+	"outqueue" : (50, 100),
+	"maillatency" : (50, 100),
+	"systemload" : (75, 90)
+}
+
+def inventory_barracudamini (info):
+	# Debug: lets see how the data we get looks like
+	#import pprint
+	#if info[0]:
+	#	pprint.pprint(info[0])
+	#	pprint.pprint(len(info[0][0]))
+	#pprint.pprint(info)
+	#return []
+
+	for line in info:
+		name, value = line
+		yield name, None
+
+
+def check_barracudamini(item, params, info):
+	for line in info:
+		if line[0] == item:
+			infotext = "%s: %s" % (line[0], line[1])
+			perfdata = [(line[0], line[1])]
+			yield 0, infotext, perfdata
+
+check_info["barracudamini"] = {
+    "check_function"            : check_barracudamini,
+    "inventory_function"        : inventory_barracudamini,
+    "service_description"       : "Barracuda %s",
+    "default_levels_variable"   : "barracudamini",
+    "group"                     : "barracudamini",
+    "has_perfdata"              : True,
+}

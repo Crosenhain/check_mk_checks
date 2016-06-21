@@ -11,7 +11,7 @@ def inventory_cisco_currlinerate (info):
         inventory = []
 
         for upload, download in info[0]:
-                inventory.append( ("Cisco Current Line Rate", {}) )
+                inventory.append( ("Cisco Current Line Rate", "cisco_currlinerate_default_levels") )
 
         return inventory
 

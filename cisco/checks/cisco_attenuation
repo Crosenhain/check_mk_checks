@@ -26,7 +26,7 @@ def inventory_cisco_attenuation (info):
         inventory = []
 
         for upload, download in info[1]:
-                inventory.append( ("Cisco Attenuation", {}) )
+                inventory.append( ("Cisco Attenuation", "cisco_attenuation_default_levels") )
 
         return inventory
 

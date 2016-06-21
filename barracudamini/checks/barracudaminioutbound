@@ -1,0 +1,226 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+check_default_levels["barracudaminioutbound"] = "barracudaminioutbound_default_levels"
+
+factory_settings["barracudaminioutbound_default_levels"] = {
+	"OutboundPolicyBlocked" : (5000, 10000),
+	"OutboundSpamBlocked" : (5000, 10000),
+	"OutboundVirusBlocked" : (5000, 10000),
+	"OutboundRateLimited" : (5000, 10000),
+	"OutboundQuarantined" : (5000, 10000),
+	"OutboundEncrypted" : (5000, 10000),
+	"OutboundRedirected" : (5000, 10000),
+	"OutboundSent" : (5000, 10000),
+}
+
+def inventory_barracudaminioutbound (info):
+	inventory = []
+	for OutboundPolicyBlocked, OutboundSpamBlocked, OutboundVirusBlocked, OutboundRateLimited, OutboundQuarantined, OutboundOutboundEncrypted, OutboundOutboundRedirected, OutboundSent in info:
+			inventory.append( ("Barracuda Outbound", {}) )
+	return inventory
+
+def check_barracudaminioutbound(item, params, info):
+	if len(info) != 1:
+		return(3, "UNKNOWN - Invalid output from Agent")
+
+	moduleinfo = {}
+	perfdata = []
+	severity = "OK"
+	rc = 0
+	infotext = "Outbound Messages"
+
+	# Get warn/crit values
+	OutboundPolicyBlockedparams = params.get("OutboundPolicyBlocked")
+	if OutboundPolicyBlockedparams == None:
+		OutboundPolicyBlockedwarn, OutboundPolicyBlockedcrit = None, None
+	else:
+		OutboundPolicyBlockedwarn, OutboundPolicyBlockedcrit = OutboundPolicyBlockedparams
+
+	# Get warn/crit values
+	OutboundSpamBlockedparams = params.get("OutboundSpamBlocked")
+	if OutboundSpamBlockedparams == None:
+		OutboundSpamBlockedwarn, OutboundSpamBlockedcrit = None, None
+	else:
+		OutboundSpamBlockedwarn, OutboundSpamBlockedcrit = OutboundSpamBlockedparams
+
+	OutboundVirusBlockedparams = params.get("OutboundVirusBlocked")
+	if OutboundVirusBlockedparams == None:
+		OutboundVirusBlockedwarn, OutboundVirusBlockedcrit = None, None
+	else:
+		OutboundVirusBlockedwarn, OutboundVirusBlockedcrit = OutboundVirusBlockedparams
+
+	OutboundRateLimitedparams = params.get("OutboundRateLimited")
+	if OutboundRateLimitedparams == None:
+		OutboundRateLimitedwarn, OutboundRateLimitedcrit = None, None
+	else:
+		OutboundRateLimitedwarn, OutboundRateLimitedcrit = OutboundRateLimitedparams
+
+	OutboundQuarantinedparams = params.get("OutboundQuarantined")
+	if OutboundQuarantinedparams == None:
+		OutboundQuarantinedwarn, OutboundQuarantinedcrit = None, None
+	else:
+		OutboundQuarantinedwarn, OutboundQuarantinedcrit = OutboundQuarantinedparams
+
+	OutboundEncryptedparams = params.get("OutboundEncrypted")
+	if OutboundEncryptedparams == None:
+		OutboundEncryptedwarn, OutboundEncryptedcrit = None, None
+	else:
+		OutboundEncryptedwarn, OutboundEncryptedcrit = OutboundEncryptedparams
+
+	OutboundRedirectedparams = params.get("OutboundRedirected")
+	if OutboundRedirectedparams == None:
+		OutboundRedirectedwarn, OutboundRedirectedcrit = None, None
+	else:
+		OutboundRedirectedwarn, OutboundRedirectedcrit = OutboundRedirectedparams
+
+	OutboundSentparams = params.get("OutboundSent")
+	if OutboundSentparams == None:
+		OutboundSentwarn, OutboundSentcrit = None, None
+	else:
+		OutboundSentwarn, OutboundSentcrit = OutboundSentparams
+
+	for OutboundPolicyBlocked, OutboundSpamBlocked, OutboundVirusBlocked, OutboundRateLimited, OutboundQuarantined, OutboundEncrypted, OutboundRedirected, OutboundSent in info:
+
+		# compare OutboundPolicyBlocked measurement value against warn, crit thresholds
+		if OutboundPolicyBlockedcrit and OutboundPolicyBlockedwarn:
+			if saveint(OutboundPolicyBlocked) >= OutboundPolicyBlockedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " OutboundPolicyBlocked: %s Messages (!!)," % (OutboundPolicyBlocked)
+			elif saveint(OutboundPolicyBlocked) >= OutboundPolicyBlockedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " OutboundPolicyBlocked: %s Messages (!)," % (OutboundPolicyBlocked)
+			else:
+				infotext += " OutboundPolicyBlocked: %s Messages," % (OutboundPolicyBlocked)
+		else:
+			infotext += " OutboundPolicyBlocked: %s Messages," % (OutboundPolicyBlocked)
+
+		# compare OutboundSpamBlocked measurement value against warn, crit thresholds
+		if OutboundSpamBlockedcrit and OutboundSpamBlockedwarn:
+			if saveint(OutboundSpamBlocked) >= OutboundSpamBlockedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " OutboundSpamBlocked: %s Messages (!!)," % (OutboundSpamBlocked)
+			elif saveint(OutboundSpamBlocked) >= OutboundSpamBlockedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " OutboundSpamBlocked: %s Messages (!)," % (OutboundSpamBlocked)
+			else:
+				infotext += " OutboundSpamBlocked: %s Messages," % (OutboundSpamBlocked)
+		else:
+			infotext += " OutboundSpamBlocked: %s Messages," % (OutboundSpamBlocked)
+
+		# compare OutboundVirusBlocked measurement value against warn, crit thresholds
+		if OutboundVirusBlockedcrit and OutboundVirusBlockedwarn:
+			if saveint(OutboundVirusBlocked) >= OutboundVirusBlockedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " OutboundVirusBlocked: %s Messages (!!)," % (OutboundVirusBlocked)
+			elif saveint(OutboundVirusBlocked) >= OutboundVirusBlockedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " OutboundVirusBlocked: %s Messages (!)," % (OutboundVirusBlocked)
+			else:
+				infotext += " OutboundVirusBlocked: %s Messages," % (OutboundVirusBlocked)
+		else:
+			infotext += " OutboundVirusBlocked: %s Messages," % (OutboundVirusBlocked)
+
+		# compare OutboundRateLimited measurement value against warn, crit thresholds
+		if OutboundRateLimitedcrit and OutboundRateLimitedwarn:
+			if saveint(OutboundRateLimited) >= OutboundRateLimitedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " OutboundRateLimited: %s Messages (!!)," % (OutboundRateLimited)
+			elif saveint(OutboundRateLimited) >= OutboundRateLimitedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " OutboundRateLimited: %s Messages (!)," % (OutboundRateLimited)
+			else:
+				infotext += " OutboundRateLimited: %s Messages," % (OutboundRateLimited)
+		else:
+			infotext += " OutboundRateLimited: %s Messages," % (OutboundRateLimited)
+
+		# compare OutboundQuarantined measurement value against warn, crit thresholds
+		if OutboundQuarantinedcrit and OutboundQuarantinedwarn:
+			if saveint(OutboundQuarantined) >= OutboundQuarantinedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " OutboundQuarantined: %s Messages (!!)," % (OutboundQuarantined)
+			elif saveint(OutboundQuarantined) >= OutboundQuarantinedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " OutboundQuarantined: %s Messages (!)," % (OutboundQuarantined)
+			else:
+				infotext += " OutboundQuarantined: %s Messages," % (OutboundQuarantined)
+		else:
+			infotext += " OutboundQuarantined: %s Messages," % (OutboundQuarantined)
+
+		# compare OutboundEncrypted measurement value against warn, crit thresholds
+		if OutboundEncryptedcrit and OutboundEncryptedwarn:
+			if saveint(OutboundEncrypted) >= OutboundEncryptedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " OutboundEncrypted: %s Messages (!!)," % (OutboundEncrypted)
+			elif saveint(OutboundEncrypted) >= OutboundEncryptedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " OutboundEncrypted: %s Messages (!)," % (OutboundEncrypted)
+			else:
+				infotext += " OutboundEncrypted: %s Messages," % (OutboundEncrypted)
+		else:
+			infotext += " OutboundEncrypted: %s Messages," % (OutboundEncrypted)
+
+		# compare OutboundRedirected measurement value against warn, crit thresholds
+		if OutboundRedirectedcrit and OutboundRedirectedwarn:
+			if saveint(OutboundRedirected) >= OutboundRedirectedcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " OutboundRedirected: %s Messages (!!)," % (OutboundRedirected)
+			elif saveint(OutboundRedirected) >= OutboundRedirectedwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " OutboundRedirected: %s Messages (!)," % (OutboundRedirected)
+			else:
+				infotext += " OutboundRedirected: %s Messages," % (OutboundRedirected)
+		else:
+			infotext += " OutboundRedirected: %s Messages," % (OutboundRedirected)
+
+		# compare OutboundSent measurement value against warn, crit thresholds
+		if OutboundSentcrit and OutboundSentwarn:
+			if saveint(OutboundSent) >= OutboundSentcrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " OutboundSent: %s Messages (!!)," % (OutboundSent)
+			elif saveint(OutboundSent) >= OutboundSentwarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " OutboundSent: %s Messages (!)," % (OutboundSent)
+			else:
+				infotext += " OutboundSent: %s Messages," % (OutboundSent)
+		else:
+			infotext += " OutboundSent: %s Messages," % (OutboundSent)
+
+
+		perfdata = [ ( "OutboundPolicyBlocked", saveint(OutboundPolicyBlocked), OutboundPolicyBlockedwarn, OutboundPolicyBlockedcrit ),
+				( "OutboundSpamBlocked", saveint(OutboundSpamBlocked), OutboundSpamBlockedwarn, OutboundSpamBlockedcrit ),
+				( "OutboundVirusBlocked", saveint(OutboundVirusBlocked), OutboundVirusBlockedwarn, OutboundVirusBlockedcrit ),
+				( "OutboundRateLimited", saveint(OutboundRateLimited), OutboundRateLimitedwarn, OutboundRateLimitedcrit ),
+				( "OutboundQuarantined", saveint(OutboundQuarantined), OutboundQuarantinedwarn, OutboundQuarantinedcrit ),
+				( "OutboundEncrypted", saveint(OutboundEncrypted), OutboundEncryptedwarn, OutboundEncryptedcrit ),
+				( "OutboundRedirected", saveint(OutboundRedirected), OutboundRedirectedwarn, OutboundRedirectedcrit ),
+				( "OutboundSent", saveint(OutboundSent), OutboundSentwarn, OutboundSentcrit ) ]
+
+		output = severity + " - " + infotext
+		return (rc, output, perfdata)
+	return (3, "UNKNOWN - item not found in agent data")
+
+check_info["barracudaminioutbound"] = {
+    "check_function"            : check_barracudaminioutbound,
+    "inventory_function"        : inventory_barracudaminioutbound,
+    "service_description"       : "Barracuda %s",
+    "default_levels_variable"   : "barracudaminioutbound",
+    "group"                     : "barracudaminioutbound",
+    "has_perfdata"              : True,
+}

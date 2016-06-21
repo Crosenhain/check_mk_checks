@@ -1,0 +1,66 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+check_default_levels["barracudaminilatency"] = "barracudaminilatency_default_levels"
+
+factory_settings["barracudaminilatency_default_levels"] = {
+	"maillatency" : (50, 100)
+}
+
+def inventory_barracudaminilatency (info):
+	inventory = []
+
+	for maillatency in info[0]:
+		inventory.append( ("Barracuda Mail Latency", {}) )
+
+	return inventory
+
+
+def check_barracudaminilatency(item, params, info):
+	if len(info) != 1:
+		return(3, "UNKNOWN - Invalid output from Agent")
+
+	moduleinfo = {}
+	perfdata = []
+	severity = "OK"
+	rc = 0
+	infotext = "Mail Latency"
+
+	# Get warn/crit values
+	maillatencyparams = params.get("maillatency")
+	if maillatencyparams == None:
+		maillatencywarn, maillatencycrit = None, None
+	else:
+		maillatencywarn, maillatencycrit = maillatencyparams
+
+	for maillatency in info[0]:
+		# compare maillatency measurement value against warn, crit thresholds
+		if maillatencycrit and maillatencywarn:
+			if saveint(maillatency[0]) >= maillatencycrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " %s seconds (!!)" % (saveint(maillatency[0]))
+			elif saveint(maillatency[0]) >= maillatencywarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " %s seconds (!)" % (saveint(maillatency[0]))
+			else:
+				infotext += " %s seconds" % (saveint(maillatency[0]))
+		else:
+			infotext += " %s seconds" % (saveint(maillatency[0]))
+
+
+		perfdata = [ ( "maillatency", saveint(maillatency[0]), maillatencywarn, maillatencycrit ) ]
+
+		output = severity + " - " + infotext
+		return (rc, output, perfdata)
+	return (3, "UNKNOWN - item not found in agent data")
+
+check_info["barracudaminilatency"] = {
+    "check_function"            : check_barracudaminilatency,
+    "inventory_function"        : inventory_barracudaminilatency,
+    "service_description"       : "Barracuda %s",
+    "default_levels_variable"   : "barracudaminilatency",
+    "group"                     : "barracudaminilatency",
+    "has_perfdata"              : True,
+}

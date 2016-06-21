@@ -1,0 +1,86 @@
+#!/usr/bin/python
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+check_default_levels["barracudaminiqueues"] = "barracudaminiqueues_default_levels"
+
+factory_settings["barracudaminiqueues_default_levels"] = {
+	"inqueue" : (50, 100),
+	"outqueue" : (50, 100),
+}
+
+def inventory_barracudaminiqueues (info):
+	inventory = []
+	for inqueue, outqueue in info:
+			inventory.append( ("Barracuda Queues", {}) )
+	return inventory
+
+def check_barracudaminiqueues(item, params, info):
+
+	if len(info) != 1:
+		return(3, "UNKNOWN - Invalid output from Agent")
+
+	moduleinfo = {}
+	perfdata = []
+	severity = "OK"
+	rc = 0
+	infotext = "Queue Length"
+
+	# Get warn/crit values
+	inqueueparams = params.get("inqueue")
+	if inqueueparams == None:
+		inqueuewarn, inqueuecrit = None, None
+	else:
+		inqueuewarn, inqueuecrit = inqueueparams
+
+	outqueueparams = params.get("outqueue")
+	if outqueueparams == None:
+		outqueuewarn, outqueuecrit = None, None
+	else:
+		outqueuewarn, outqueuecrit = outqueueparams
+
+	for inqueue, outqueue in info:
+		# compare inqueue measurement value against warn, crit thresholds
+		if inqueuecrit and inqueuewarn:
+			if saveint(inqueue) >= inqueuecrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " inqueue: %s Messages (!!)," % (inqueue)
+			elif saveint(inqueue) >= inqueuewarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " inqueue: %s Messages (!)," % (inqueue)
+			else:
+				infotext += " inqueue: %s Messages," % (inqueue)
+		else:
+			infotext += " inqueue: %s Messages," % (inqueue)
+
+		# compare outqueue measurement value against warn, crit thresholds
+		if outqueuecrit and outqueuewarn:
+			if saveint(outqueue) >= outqueuecrit:
+				severity = "CRITICAL"
+				rc = 2
+				infotext += " outqueue: %s Messages (!!)," % (outqueue)
+			elif saveint(outqueue) >= outqueuewarn:
+				severity = "WARNING"
+				rc = 1
+				infotext += " outqueue: %s Messages (!)," % (outqueue)
+			else:
+				infotext += " outqueue: %s Messages," % (outqueue)
+		else:
+			infotext += " outqueue: %s Messages," % (outqueue)
+
+		perfdata = [ ( "inqueue", saveint(inqueue), inqueuewarn, inqueuecrit ),
+				( "outqueue", saveint(outqueue), outqueuewarn, outqueuecrit ) ]
+
+		output = severity + " - " + infotext
+		return (rc, output, perfdata)
+	return (3, "UNKNOWN - item not found in agent data")
+
+check_info["barracudaminiqueues"] = {
+    "check_function"            : check_barracudaminiqueues,
+    "inventory_function"        : inventory_barracudaminiqueues,
+    "service_description"       : "Barracuda %s",
+    "default_levels_variable"   : "barracudaminiqueues",
+    "group"                     : "barracudaminiqueues",
+    "has_perfdata"              : True,
+}
