@@ -1,0 +1,61 @@
+#!/usr/bin/python
+from unifi.controller import Controller
+import sys, getopt
+
+def usage():
+	sys.stderr.write("""Check_MK UniFi Agent
+USAGE: agent_unifi --host=HOST --username=USERNAME --password=PASSWORD
+Optional: --port=PORT --version=(v2,v3,v4,v5) --site=SITENAME (usually just default)
+""")
+	sys.exit(1)
+
+short_options = 'h:'
+long_options  = ['help', 'host=', 'username=', 'password=', 'port=', 'version=', 'site=']
+
+host = None
+username = None
+password = None
+port = "8443"
+version = "v4"
+site = "default"
+
+try:
+	opts, args = getopt.getopt(sys.argv[1:], short_options, long_options)
+except getopt.GetoptError, err:
+	sys.stderr.write("%s\n" % err)
+	sys.exit(1)
+
+for o,a in opts:
+	if o in [ '--host' ]:
+		host = a
+	elif o in [ '--username' ]:
+		username = a
+	elif o in [ '--password']:
+		password = a
+	elif o in [ '--port']:
+		port = a
+	elif o in [ '--version']:
+		version = a
+	elif o in [ '--site']:
+		site = a
+	elif o in [ '-h', '--help' ]:
+		usage()
+
+if len(args) > 0 or not host or not username or not password:
+	usage()
+
+c = Controller(host, username, password, port, version, site)
+
+try:
+	print "<<<check_mk>>>"
+	print "Version: 0.1"
+	print "AgentOS: UniFi"
+	aps = c.get_aps()
+	for ap in aps:
+		print "<<<<%s>>>>" % (ap.get('name').replace(" ", "-")).lower()
+		print "<<<unificlients>>>"
+		print "%s %s" % (ap.get('na-num_sta'), ap.get('ng-num_sta'))
+		print "<<<<>>>>"
+except Exception, e:
+	sys.stderr.write("Error %s" % e)
+	sys.exit(1)

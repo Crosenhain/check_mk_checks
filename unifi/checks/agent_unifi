@@ -1,0 +1,14 @@
+#!/usr/bin/python
+
+def agent_unifi_arguments(params, hostname, ipaddress):
+	args = ''
+	args += " --host " + quote_shell_string("%s" % (hostname))
+	args += " --username " + quote_shell_string(params["username"])
+	args += " --password " + quote_shell_string(params["password"])
+	args += " --port " + quote_shell_string(params["port"])
+	args += " --version " + quote_shell_string(params["version"])
+	args += " --site " + quote_shell_string(params["site"])
+
+	return args
+
+special_agent_info['unifi'] = agent_unifi_arguments

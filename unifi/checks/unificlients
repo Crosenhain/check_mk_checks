@@ -1,0 +1,82 @@
+#!/usr/bin/python
+
+check_default_levels["unificlients"] = "unificlients_default_levels"
+
+factory_settings["unificlients_default_levels"] = {
+	"clients" : (20, 30)
+}
+
+def inventory_unificlients (info):
+	inventory = []
+
+	for clients in info:
+		inventory.append( ("Number of Clients", {}) )
+
+	return inventory
+
+
+def check_unificlients(item, params, info):
+	if len(info) != 1:
+		return(3, "UNKNOWN - Invalid output from Agent")
+
+	moduleinfo = {}
+	perfdata = []
+	severity = "OK"
+	#rc = 0
+        rc2 = 0
+        rc5 = 0
+	infotext = ""
+
+	# Get warn/crit values
+	clientsparams = params.get("clients")
+	if clientsparams == None:
+		clientswarn, clientscrit = None, None
+	else:
+		clientswarn, clientscrit = clientsparams
+
+	for clients5,clients2 in info:
+		# compare clients measurement value against warn, crit thresholds
+		if clientscrit and clientswarn:
+			if saveint(clients5) >= clientscrit:
+				severity = "CRITICAL"
+				rc5 = 2
+				infotext += " %s 5GHz Clients (!!)," % (saveint(clients5))
+			elif saveint(clients5) >= clientswarn:
+				severity = "WARNING"
+				rc5 = 1
+				infotext += " %s 5GHz Clients (!)," % (saveint(clients5))
+			else:
+				infotext += " %s 5GHz Clients," % (saveint(clients5))
+		else:
+			infotext += " %s 5GHz Clients," % (saveint(clients5))
+
+		if clientscrit and clientswarn:
+			if saveint(clients2) >= clientscrit:
+				severity = "CRITICAL"
+				rc2 = 2
+				infotext += " %s 2.4GHz Clients (!!)" % (saveint(clients2))
+			elif saveint(clients2) >= clientswarn:
+				severity = "WARNING"
+				rc2 = 1
+				infotext += " %s 2.4GHz Clients (!)" % (saveint(clients2))
+			else:
+				infotext += " %s 2.4GHz Clients" % (saveint(clients2))
+		else:
+			infotext += " %s 2.4GHz Clients" % (saveint(clients2))
+
+		perfdata = [ ( "clients5", saveint(clients5), clientswarn, clientscrit ),
+                             ( "clients2", saveint(clients2), clientswarn, clientscrit) ]
+                rc = max(rc5,rc2)
+		output = severity + " - " + infotext
+		return (rc, output, perfdata)
+	return (3, "UNKNOWN - item not found in agent data")
+
+check_info["unificlients"] = {
+    "check_function"            : check_unificlients,
+    "inventory_function"        : inventory_unificlients,
+    "service_description"       : "UniFi %s",
+    "default_levels_variable"   : "unificlients_default_levels",
+    "group"                     : "unificlients",
+    "has_perfdata"              : True,
+}
+
