@@ -3,3 +3,5 @@ This can be run as either an agent plugin living in `/usr/lib/check_mk_agent/plu
 
 This relies on the unifi API python library: 
 `sudo pip install -U unifi`
+
+The data is available as piggyback data on the APs.
